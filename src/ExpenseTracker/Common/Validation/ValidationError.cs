@@ -1,4 +1,4 @@
-﻿namespace ExpenseTracker.Api.Features.Expenses.Validation
+﻿namespace ExpenseTracker.Api.Common.Validation
 {
     public class ValidationError
     {

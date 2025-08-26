@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace ExpenseTracker.Api.Features.Expenses.Validation
+namespace ExpenseTracker.Api.Common.Validation
 {
     public static class ValidationsProblemBuilder
     {
