@@ -2,7 +2,7 @@
 
 namespace ExpenseTracker.Api.Infrastructure.DTO.Expense
 {
-    public class CreateExpenseRequest
+    public record CreateExpenseRequest
     {
         public string? Description { get; set; }
         public decimal Amount { get; set; }

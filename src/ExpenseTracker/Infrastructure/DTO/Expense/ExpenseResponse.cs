@@ -2,7 +2,7 @@
 
 namespace ExpenseTracker.Api.Infrastructure.DTO.Expense
 {
-    public class ExpenseResponse
+    public record ExpenseResponse
     {
         public long Id { get; set; }
         public string? Description { get; set; }
