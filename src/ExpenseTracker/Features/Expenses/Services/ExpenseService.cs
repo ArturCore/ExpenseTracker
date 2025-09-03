@@ -23,106 +23,162 @@ namespace ExpenseTracker.Api.Features.Expenses.Services
 
         public async Task<ServiceResult<ExpenseResponse>> CreateExpenseAsync(CreateExpenseRequest request)
         {
-            ValidationResult validation = createValidator.Validate(request);
-            if(!validation.IsValid)
+            try
             {
-                return ServiceResult<ExpenseResponse>.ValidationError(validation);
-            }
+                ValidationResult validation = createValidator.Validate(request);
+                if (!validation.IsValid)
+                {
+                    return ServiceResult<ExpenseResponse>.ValidationError(validation);
+                }
 
-            Expense newExpense = await repo.AddAsync(new Expense()
+                Expense newExpense = await repo.AddAsync(new Expense()
+                {
+                    Description = request.Description,
+                    Amount = request.Amount,
+                    ExpenseDate = request.ExpenseDate ?? DateTime.Now,
+                    Category = request.Category ?? ExpenseCategory.Other
+                });
+                return ServiceResult<ExpenseResponse>.Success(new ExpenseResponse
+                {
+                    Id = newExpense.Id,
+                    Description = newExpense.Description,
+                    Amount = newExpense.Amount,
+                    ExpenseDate = newExpense.ExpenseDate,
+                    Category = newExpense.Category
+                });
+            }
+            catch (Exception ex)
             {
-                Description = request.Description,
-                Amount = request.Amount,
-                ExpenseDate = request.ExpenseDate ?? DateTime.Now,
-                Category = request.Category ?? ExpenseCategory.Other
-            });
-            return ServiceResult<ExpenseResponse>.Success(new ExpenseResponse
-            {
-                Id = newExpense.Id,
-                Description = newExpense.Description,
-                Amount = newExpense.Amount,
-                ExpenseDate = newExpense.ExpenseDate,
-                Category = newExpense.Category
-            });
+                return ServiceResult<ExpenseResponse>.UnexpectedError(ex.Message);
+            }
         }
 
 
-        public async Task<bool> DeleteExpenseAsync(Guid id)
+        public async Task<ServiceResult<DeleteExpenseResult>> DeleteExpenseAsync(Guid id)
         {
-            return await repo.DeleteAsync(id);
+            try
+            {
+                Expense expense = await repo.GetByIdAsync(id);
+                if (expense == null)
+                {
+                    return ServiceResult<DeleteExpenseResult>.NotFoundResult();
+                }
+                await repo.DeleteAsync(id);
+                return ServiceResult<DeleteExpenseResult>.Success(new DeleteExpenseResult()
+                {
+                    Id = expense.Id
+                });
+            }
+            catch (Exception ex)
+            {
+                return ServiceResult<DeleteExpenseResult>.UnexpectedError(ex.Message);
+            }
         }
 
         public async Task<ServiceResult<List<ExpenseResponse>>> GetAllAsync()
         {
-            List<Expense> expenses = await repo.GetAllAsync();
-            List<ExpenseResponse> expenseResponses = expenses.Select(e => new ExpenseResponse
+            try
             {
-                Id = e.Id,
-                Description = e.Description,
-                Amount = e.Amount,
-                ExpenseDate = e.ExpenseDate,
-                Category = e.Category
-            }).ToList();
-            return ServiceResult<List<ExpenseResponse>>.Success(expenseResponses);
-            
+                List<Expense> expenses = await repo.GetAllAsync();
+                List<ExpenseResponse> expenseResponses = expenses.Select(e => new ExpenseResponse
+                {
+                    Id = e.Id,
+                    Description = e.Description,
+                    Amount = e.Amount,
+                    ExpenseDate = e.ExpenseDate,
+                    Category = e.Category
+                }).ToList();
+                return ServiceResult<List<ExpenseResponse>>.Success(expenseResponses);
+            }
+            catch (Exception ex)
+            {
+                return ServiceResult<List<ExpenseResponse>>.UnexpectedError(ex.Message);
+            }
         }
 
         public async Task<ServiceResult<List<ExpenseResponse>>> GetByDateRangeAsync(DateTime startDate, DateTime endDate)
         {
-            List<Expense> expenses = await repo.GetByDateRangeAsync(startDate, endDate);
-            List<ExpenseResponse> expenseResponses = expenses.Select(e => new ExpenseResponse
+            try
             {
-                Id = e.Id,
-                Description = e.Description,
-                Amount = e.Amount,
-                ExpenseDate = e.ExpenseDate,
-                Category = e.Category
-            }).ToList();
-            return ServiceResult<List<ExpenseResponse>>.Success(expenseResponses);
+                List<Expense> expenses = await repo.GetByDateRangeAsync(startDate, endDate);
+                List<ExpenseResponse> expenseResponses = expenses.Select(e => new ExpenseResponse
+                {
+                    Id = e.Id,
+                    Description = e.Description,
+                    Amount = e.Amount,
+                    ExpenseDate = e.ExpenseDate,
+                    Category = e.Category
+                }).ToList();
+                return ServiceResult<List<ExpenseResponse>>.Success(expenseResponses);
+            }
+            catch (Exception ex)
+            {
+                return ServiceResult<List<ExpenseResponse>>.UnexpectedError(ex.Message);
+            }
         }
 
         public async Task<ServiceResult<ExpenseResponse>> GetByIdAsync(Guid id)
         {
-            Expense expense = await repo.GetByIdAsync(id);
-            if (expense == null)
+            try
             {
-                return ServiceResult<ExpenseResponse>.NotFoundResult();
+                Expense expense = await repo.GetByIdAsync(id);
+                if (expense == null)
+                {
+                    return ServiceResult<ExpenseResponse>.NotFoundResult();
+                }
+                return ServiceResult<ExpenseResponse>.Success(new ExpenseResponse()
+                {
+                    Id = expense.Id,
+                    Description = expense.Description,
+                    Amount = expense.Amount,
+                    ExpenseDate = expense.ExpenseDate,
+                    Category = expense.Category
+                });
             }
-            return ServiceResult<ExpenseResponse>.Success(new ExpenseResponse()
+            catch (Exception ex)
             {
-                Id = expense.Id,
-                Description = expense.Description,
-                Amount = expense.Amount,
-                ExpenseDate = expense.ExpenseDate,
-                Category = expense.Category
-            });
+                return ServiceResult<ExpenseResponse>.UnexpectedError(ex.Message);
+            }
         }
 
         public async Task<ServiceResult<ExpenseResponse>> UpdateExpenseAsync(UpdateExpenseRequest request)
         {
-            ValidationResult validation = updateValidator.Validate(request);
-            if (!validation.IsValid)
+            try
             {
-                return ServiceResult<ExpenseResponse>.ValidationError(validation);
-            }
+                ValidationResult validation = updateValidator.Validate(request);
+                if (!validation.IsValid)
+                {
+                    return ServiceResult<ExpenseResponse>.ValidationError(validation);
+                }
 
-            Expense currentExpense = await repo.GetByIdAsync(request.Id);
-            Expense updatedExpense = await repo.UpdateAsync(new Expense
+                Expense expense = await repo.GetByIdAsync(request.Id);
+                if (expense == null)
+                {
+                    return ServiceResult<ExpenseResponse>.NotFoundResult();
+                }
+
+                Expense currentExpense = await repo.GetByIdAsync(request.Id);
+                Expense updatedExpense = await repo.UpdateAsync(new Expense
+                {
+                    Id = request.Id,
+                    Description = request.Description ?? currentExpense.Description,
+                    Amount = request.Amount ?? currentExpense.Amount,
+                    ExpenseDate = request.ExpenseDate ?? currentExpense.ExpenseDate,
+                    Category = request.Category ?? currentExpense.Category
+                });
+                return ServiceResult<ExpenseResponse>.Success(new ExpenseResponse
+                {
+                    Id = updatedExpense.Id,
+                    Description = updatedExpense.Description,
+                    Amount = updatedExpense.Amount,
+                    ExpenseDate = updatedExpense.ExpenseDate,
+                    Category = updatedExpense.Category
+                });
+            }
+            catch (Exception ex)
             {
-                Id = request.Id,
-                Description = request.Description ?? currentExpense.Description,
-                Amount = request.Amount ?? currentExpense.Amount,
-                ExpenseDate = request.ExpenseDate ?? currentExpense.ExpenseDate,
-                Category = request.Category ?? currentExpense.Category
-            });
-            return ServiceResult<ExpenseResponse>.Success(new ExpenseResponse
-            {
-                Id = updatedExpense.Id,
-                Description = updatedExpense.Description,
-                Amount = updatedExpense.Amount,
-                ExpenseDate = updatedExpense.ExpenseDate,
-                Category = updatedExpense.Category
-            });
+                return ServiceResult<ExpenseResponse>.UnexpectedError(ex.Message);
+            }
         }
     }
 }

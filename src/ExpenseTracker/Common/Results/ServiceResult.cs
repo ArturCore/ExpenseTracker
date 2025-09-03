@@ -8,6 +8,7 @@ namespace ExpenseTracker.Api.Common.Results
         public bool NotFound { get; private set; }
         public T? Value { get; private set; }
         public ValidationResult? Validation { get; private set; }
+        public string? Message { get; set; }
 
         public static ServiceResult<T> NotFoundResult()
         {
@@ -16,7 +17,8 @@ namespace ExpenseTracker.Api.Common.Results
                 IsSuccess = false,
                 NotFound = true,
                 Value = null,
-                Validation = null
+                Validation = null,
+                Message = "Not found result using input data"
             };
         }
         public static ServiceResult<T> Success(T value)
@@ -26,7 +28,8 @@ namespace ExpenseTracker.Api.Common.Results
                 IsSuccess = true,
                 NotFound = false,
                 Value = value,
-                Validation = null
+                Validation = null,
+                Message = null
             };
         }
         public static ServiceResult<T> ValidationError(ValidationResult validation)
@@ -36,7 +39,19 @@ namespace ExpenseTracker.Api.Common.Results
                 IsSuccess = false,
                 NotFound = false,
                 Value = null,
-                Validation = validation
+                Validation = validation,
+                Message = "Validation error"
+            };
+        }
+        public static ServiceResult<T> UnexpectedError(string message)
+        {
+            return new ServiceResult<T>
+            {
+                IsSuccess = false,
+                NotFound = false,
+                Value = null,
+                Validation = null,
+                Message = $"Unexpected error occurred: {message}"
             };
         }
     }
