@@ -1,4 +1,5 @@
-﻿using ExpenseTracker.Api.Common.Results;
+﻿using AutoMapper;
+using ExpenseTracker.Api.Common.Results;
 using ExpenseTracker.Api.Common.Validation;
 using ExpenseTracker.Api.Features.Expenses.Models;
 using ExpenseTracker.Api.Features.Expenses.Repository;
@@ -11,14 +12,17 @@ namespace ExpenseTracker.Api.Features.Expenses.Services
         private readonly IExpenseRepository repo;
         private readonly IValidator<CreateExpenseRequest> createValidator;
         private readonly IValidator<UpdateExpenseRequest> updateValidator;
+        private readonly IMapper mapper;
 
         public ExpenseService(IExpenseRepository _repo, 
             IValidator<CreateExpenseRequest> _createValidator,
-            IValidator<UpdateExpenseRequest> _updateValidator)
+            IValidator<UpdateExpenseRequest> _updateValidator,
+            IMapper _mapper)
         {
             repo = _repo;
             createValidator = _createValidator;
             updateValidator = _updateValidator;
+            mapper = _mapper;
         }
 
         public async Task<ServiceResult<ExpenseResponse>> CreateExpenseAsync(CreateExpenseRequest request)
@@ -38,14 +42,7 @@ namespace ExpenseTracker.Api.Features.Expenses.Services
                     ExpenseDate = request.ExpenseDate ?? DateTime.Now,
                     Category = request.Category ?? ExpenseCategory.Other
                 });
-                return ServiceResult<ExpenseResponse>.Success(new ExpenseResponse
-                {
-                    Id = newExpense.Id,
-                    Description = newExpense.Description,
-                    Amount = newExpense.Amount,
-                    ExpenseDate = newExpense.ExpenseDate,
-                    Category = newExpense.Category
-                });
+                return ServiceResult<ExpenseResponse>.Success(mapper.Map<ExpenseResponse>(newExpense));
             }
             catch (Exception ex)
             {
@@ -80,14 +77,7 @@ namespace ExpenseTracker.Api.Features.Expenses.Services
             try
             {
                 List<Expense> expenses = await repo.GetAllAsync();
-                List<ExpenseResponse> expenseResponses = expenses.Select(e => new ExpenseResponse
-                {
-                    Id = e.Id,
-                    Description = e.Description,
-                    Amount = e.Amount,
-                    ExpenseDate = e.ExpenseDate,
-                    Category = e.Category
-                }).ToList();
+                List<ExpenseResponse> expenseResponses = mapper.Map<List<ExpenseResponse>>(expenses);
                 return ServiceResult<List<ExpenseResponse>>.Success(expenseResponses);
             }
             catch (Exception ex)
@@ -101,14 +91,7 @@ namespace ExpenseTracker.Api.Features.Expenses.Services
             try
             {
                 List<Expense> expenses = await repo.GetByDateRangeAsync(startDate, endDate);
-                List<ExpenseResponse> expenseResponses = expenses.Select(e => new ExpenseResponse
-                {
-                    Id = e.Id,
-                    Description = e.Description,
-                    Amount = e.Amount,
-                    ExpenseDate = e.ExpenseDate,
-                    Category = e.Category
-                }).ToList();
+                List<ExpenseResponse> expenseResponses = mapper.Map<List<ExpenseResponse>>(expenses);
                 return ServiceResult<List<ExpenseResponse>>.Success(expenseResponses);
             }
             catch (Exception ex)
@@ -126,14 +109,7 @@ namespace ExpenseTracker.Api.Features.Expenses.Services
                 {
                     return ServiceResult<ExpenseResponse>.NotFoundResult();
                 }
-                return ServiceResult<ExpenseResponse>.Success(new ExpenseResponse()
-                {
-                    Id = expense.Id,
-                    Description = expense.Description,
-                    Amount = expense.Amount,
-                    ExpenseDate = expense.ExpenseDate,
-                    Category = expense.Category
-                });
+                return ServiceResult<ExpenseResponse>.Success(mapper.Map<ExpenseResponse>(expense));
             }
             catch (Exception ex)
             {
@@ -166,14 +142,7 @@ namespace ExpenseTracker.Api.Features.Expenses.Services
                     ExpenseDate = request.ExpenseDate ?? currentExpense.ExpenseDate,
                     Category = request.Category ?? currentExpense.Category
                 });
-                return ServiceResult<ExpenseResponse>.Success(new ExpenseResponse
-                {
-                    Id = updatedExpense.Id,
-                    Description = updatedExpense.Description,
-                    Amount = updatedExpense.Amount,
-                    ExpenseDate = updatedExpense.ExpenseDate,
-                    Category = updatedExpense.Category
-                });
+                return ServiceResult<ExpenseResponse>.Success(mapper.Map<ExpenseResponse>(updatedExpense));
             }
             catch (Exception ex)
             {
