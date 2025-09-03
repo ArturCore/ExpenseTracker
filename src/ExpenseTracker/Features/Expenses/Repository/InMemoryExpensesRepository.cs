@@ -7,7 +7,7 @@ namespace ExpenseTracker.Api.Features.Expenses.Repository
     {
         ConcurrentDictionary<Guid, Expense> _expenses = new();
 
-        public Task AddAsync(Expense expense)
+        public Task<Expense> AddAsync(Expense expense)
         {
             if (expense == null)
             {
@@ -16,7 +16,7 @@ namespace ExpenseTracker.Api.Features.Expenses.Repository
             Guid expenseId = Guid.NewGuid();
             expense.Id = expenseId;
             _expenses.TryAdd(expenseId, expense);
-            return Task.CompletedTask;
+            return Task.FromResult(expense);
         }
 
         public Task<bool> DeleteAsync(Guid id)
@@ -51,7 +51,7 @@ namespace ExpenseTracker.Api.Features.Expenses.Repository
                 return Task.FromResult(expense);
             }
 
-             bool updateResult = _expenses.TryUpdate(expense.Id, expense, _expenses[expense.Id]);
+            bool updateResult = _expenses.TryUpdate(expense.Id, expense, _expenses[expense.Id]);
             return Task.FromResult(_expenses[expense.Id]);
         }
 

@@ -7,7 +7,7 @@ namespace ExpenseTracker.Api.Features.Expenses.Services
     {
         Task<ServiceResult<ExpenseResponse>> GetByIdAsync(Guid id);
         Task<ServiceResult<ExpenseResponse>> CreateExpenseAsync(CreateExpenseRequest request);
-        Task<ServiceResult<ExpenseResponse>> UpdateExpenseAsync(Guid id, UpdateExpenseRequest request);
+        Task<ServiceResult<ExpenseResponse>> UpdateExpenseAsync(UpdateExpenseRequest request);
         Task<bool> DeleteExpenseAsync(Guid id);
         Task<ServiceResult<List<ExpenseResponse>>> GetAllAsync();
         Task<ServiceResult<List<ExpenseResponse>>> GetByDateRangeAsync(DateTime startDate, DateTime endDate);
