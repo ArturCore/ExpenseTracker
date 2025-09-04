@@ -16,7 +16,7 @@ builder.Services.AddAutoMapper(cfg => cfg.AddProfile<ExpenseMappingProfile>());
 builder.Services.AddTransient<IValidator<CreateExpenseRequest>, CreateExpenseRequestValidator>();
 builder.Services.AddTransient<IValidator<UpdateExpenseRequest>, UpdateExpenseRequestValidator>();
 
-builder.Services.AddSingleton<IExpenseRepository, InMemoryExpensesRepository>();
+builder.Services.AddSingleton<IExpenseRepository, FileExpensesRepository>();
 builder.Services.AddSingleton<IExpenseService, ExpenseService>();
 
 var app = builder.Build();
